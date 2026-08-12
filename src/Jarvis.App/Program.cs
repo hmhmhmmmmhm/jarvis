@@ -1,13 +1,25 @@
 ﻿using Jarvis.App;
+using Jarvis.App.Commands;
 
-Console.WriteLine("Jarvis 0.1");
+Console.WriteLine("Jarvis 0.2");
 Console.WriteLine();
+
+List<ICommand> commands = new List<ICommand>();
+
+commands.Add(new TimeCommand());
+commands.Add(new EchoCommand());
+commands.Add(new ExitCommand());
+commands.Add(new DateCommand());
+commands.Add(new HelpCommand(commands));
+
+
+CommandHandler commandHandler = new CommandHandler(commands);
 
 bool isRunning = true;
 
 while (isRunning)
 {
-    Console.Write("> Введите help для списка команд: ");
+    Console.Write("> ");
 
     string? command = Console.ReadLine();
 
@@ -18,5 +30,5 @@ while (isRunning)
 
     command = command.Trim();
 
-    isRunning = CommandHandler.Handle(command);
+    isRunning = commandHandler.Handle(command);
 }
