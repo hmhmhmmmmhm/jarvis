@@ -1,3 +1,4 @@
+using Jarvis.App.Models;
 using Jarvis.App.Parsing;
 
 namespace Jarvis.App.Tests;
@@ -12,112 +13,75 @@ public class IntentParserTests
         _parser = new IntentParser();
     }
 
-    [TestCase("открой ютуб", "open ютуб")]
-    [TestCase("запусти ютуб", "open ютуб")]
-    [TestCase("открой мне гитхаб", "open гитхаб")]
-    public void Parse_OpenPhrases_ReturnsOpenCommand(
+    [TestCase("открой ютуб", "open", "ютуб")]
+    [TestCase("запусти ютуб", "open", "ютуб")]
+    [TestCase("открой мне гитхаб", "open", "гитхаб")]
+    public void Parse_OpenPhrases_ReturnsOpenIntent(
         string input,
-        string expected)
+        string expectedCommand,
+        string expectedArgument)
     {
-        string result = _parser.Parse(input);
+        Intent result = _parser.Parse(input);
 
-        Assert.That(result, Is.EqualTo(expected));
+        Assert.That(result.CommandName, Is.EqualTo(expectedCommand));
+        Assert.That(result.Argument, Is.EqualTo(expectedArgument));
     }
 
-    [TestCase("найди погоду в питере", "search погоду в питере")]
-    [TestCase("поищи C# interfaces", "search C# interfaces")]
+    [TestCase("найди погоду в питере", "search", "погоду в питере")]
+    [TestCase("поищи C# interfaces", "search", "C# interfaces")]
     [TestCase(
         "найди в интернете курс доллара",
-        "search курс доллара")]
-    public void Parse_SearchPhrases_ReturnsSearchCommand(
+        "search",
+        "курс доллара")]
+    public void Parse_SearchPhrases_ReturnsSearchIntent(
         string input,
-        string expected)
+        string expectedCommand,
+        string expectedArgument)
     {
-        string result = _parser.Parse(input);
+        Intent result = _parser.Parse(input);
 
-        Assert.That(result, Is.EqualTo(expected));
+        Assert.That(result.CommandName, Is.EqualTo(expectedCommand));
+        Assert.That(result.Argument, Is.EqualTo(expectedArgument));
+    }
+
+    [TestCase("который час")]
+    [TestCase("сколько времени")]
+    [TestCase("сколько сейчас времени")]
+    [TestCase("который сейчас час")]
+    public void Parse_TimeQuestions_ReturnsTimeIntent(string input)
+    {
+        Intent result = _parser.Parse(input);
+
+        Assert.That(result.CommandName, Is.EqualTo("time"));
+        Assert.That(result.Argument, Is.Null);
+    }
+
+    [TestCase("какая сегодня дата")]
+    [TestCase("какое сегодня число")]
+    [TestCase("что сегодня за день")]
+    public void Parse_DateQuestions_ReturnsDateIntent(string input)
+    {
+        Intent result = _parser.Parse(input);
+
+        Assert.That(result.CommandName, Is.EqualTo("date"));
+        Assert.That(result.Argument, Is.Null);
     }
 
     [Test]
-    public void Parse_UnknownPhrase_ReturnsOriginalInput()
+    public void Parse_TechnicalCommandWithArgument_ReturnsIntent()
     {
-        string result = _parser.Parse("что-нибудь непонятное");
+        Intent result = _parser.Parse("echo Привет");
 
-        Assert.That(result, Is.EqualTo("что-нибудь непонятное"));
+        Assert.That(result.CommandName, Is.EqualTo("echo"));
+        Assert.That(result.Argument, Is.EqualTo("Привет"));
     }
 
-
-    [TestCase("который час", "time")]
-    [TestCase("сколько времени", "time")]
-    [TestCase("сколько сейчас времени", "time")]
-    public void Parse_TimeQuestions_ReturnsTimeCommand(
-        string input,
-        string expected)
+    [Test]
+    public void Parse_TechnicalCommandWithoutArgument_ReturnsIntent()
     {
-        string result = _parser.Parse(input);
+        Intent result = _parser.Parse("exit");
 
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase("какая сегодня дата", "date")]
-    [TestCase("какое сегодня число", "date")]
-    [TestCase("что сегодня за день", "date")]
-    public void Parse_DateQuestions_ReturnsDateCommand(
-        string input,
-        string expected)
-    {
-        string result = _parser.Parse(input);
-
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase("открой ютуб пожалуйста", "open ютуб")]
-    [TestCase("открой гитхаб, пожалуйста", "open гитхаб")]
-    public void Parse_PoliteOpenPhrase_RemovesPoliteSuffix(
-        string input,
-        string expected)
-    {
-        string result = _parser.Parse(input);
-
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase(
-        "найди погоду в питере пожалуйста",
-        "search погоду в питере")]
-    [TestCase(
-        "поищи C# interfaces, пожалуйста",
-        "search C# interfaces")]
-    public void Parse_PoliteSearchPhrase_RemovesPoliteSuffix(
-        string input,
-        string expected)
-    {
-        string result = _parser.Parse(input);
-
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase("Джарвис, открой ютуб", "open ютуб")]
-    [TestCase("Джарвис открой ютуб", "open ютуб")]
-    [TestCase("jarvis, открой гитхаб", "open гитхаб")]
-    public void Parse_WakeWordOpenPhrase_RemovesWakeWord(
-        string input,
-        string expected)
-    {
-        string result = _parser.Parse(input);
-
-        Assert.That(result, Is.EqualTo(expected));
-    }
-
-    [TestCase("Джарвис, который час", "time")]
-    [TestCase("Джарвис сколько времени", "time")]
-    [TestCase("Джарвис, какая сегодня дата", "date")]
-    public void Parse_WakeWordQuestions_ReturnsCommand(
-        string input,
-        string expected)
-    {
-        string result = _parser.Parse(input);
-
-        Assert.That(result, Is.EqualTo(expected));
+        Assert.That(result.CommandName, Is.EqualTo("exit"));
+        Assert.That(result.Argument, Is.Null);
     }
 }

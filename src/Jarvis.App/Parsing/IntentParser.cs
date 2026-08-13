@@ -1,21 +1,23 @@
+using Jarvis.App.Models;
+
 namespace Jarvis.App.Parsing;
 
 public class IntentParser
 {
-    public string Parse(string input)
+    public Intent Parse(string input)
     {
-
         string normalizedInput = input.Trim();
-        normalizedInput = RemoveWakeWord(normalizedInput);
 
+        // Вопросы о времени преобразуем сразу во внутреннюю команду time.
         if (IsTimeQuestion(normalizedInput))
         {
-            return "time";
+            return new Intent("time");
         }
 
+        // Вопросы о дате преобразуем во внутреннюю команду date.
         if (IsDateQuestion(normalizedInput))
         {
-            return "date";
+            return new Intent("date");
         }
 
         if (StartsWithAny(
@@ -24,15 +26,14 @@ public class IntentParser
                 "открой ",
                 "запусти "))
         {
+            // Получаем только объект, который пользователь хочет открыть.
             string target = RemovePrefix(
                 normalizedInput,
                 "открой мне ",
                 "открой ",
                 "запусти ");
 
-            target = CleanArgument(target);
-
-            return $"open {target}";
+            return new Intent("open", target);
         }
 
         if (StartsWithAny(
@@ -41,20 +42,29 @@ public class IntentParser
                 "найди ",
                 "поищи "))
         {
+            // Получаем поисковый запрос отдельно от имени команды.
             string query = RemovePrefix(
                 normalizedInput,
                 "найди в интернете ",
                 "найди ",
                 "поищи ");
 
-            query = CleanArgument(query);
-
-            return $"search {query}";
+            return new Intent("search", query);
         }
 
-        return normalizedInput;
+        // Если пользователь ввёл старую техническую команду,
+        // разбираем её на имя команды и аргумент.
+        string[] parts = normalizedInput.Split(' ', 2);
+
+        string commandName = parts[0].ToLower();
+        string? argument = parts.Length > 1
+            ? parts[1]
+            : null;
+
+        return new Intent(commandName, argument);
     }
-        private bool IsTimeQuestion(string input)
+
+    private bool IsTimeQuestion(string input)
     {
         string normalized = input.ToLower();
 
@@ -74,6 +84,7 @@ public class IntentParser
             "какое сегодня число" or
             "что сегодня за день";
     }
+
     private bool StartsWithAny(
         string input,
         params string[] prefixes)
@@ -106,76 +117,5 @@ public class IntentParser
         }
 
         return input;
-    }
-    
-        private string CleanArgument(string value)
-    {
-        string result = value.Trim();
-
-        string[] suffixes =
-        {
-            ", пожалуйста",
-            " пожалуйста",
-            " плиз"
-        };
-
-        foreach (string suffix in suffixes)
-        {
-            if (result.EndsWith(
-                    suffix,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                result = result[..^suffix.Length].Trim();
-                break;
-            }
-        }
-
-        return result;
-    }
-
-        private string RemoveWakeWord(string input)
-    {
-        string[] wakeWords =
-        {
-            "джарвис, ",
-            "джарвис ",
-            "jarvis, ",
-            "jarvis "
-        };
-
-        foreach (string wakeWord in wakeWords)
-        {
-            if (input.StartsWith(
-                    wakeWord,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return input[wakeWord.Length..].Trim();
-            }
-        }
-
-        return input;
-    }
-
-
-        public bool HasWakeWord(string input)
-    {
-        string normalizedInput = input.Trim();
-
-        // Проверяем русское и английское написание имени.
-        return normalizedInput.StartsWith(
-                "джарвис,",
-                StringComparison.OrdinalIgnoreCase)
-            ||
-            normalizedInput.StartsWith(
-                "джарвис ",
-                StringComparison.OrdinalIgnoreCase)
-            ||
-            normalizedInput.StartsWith(
-                "jarvis,",
-                StringComparison.OrdinalIgnoreCase)
-            ||
-            normalizedInput.StartsWith(
-                "jarvis ",
-                StringComparison.OrdinalIgnoreCase);
     }
 }

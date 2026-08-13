@@ -1,4 +1,5 @@
 using Jarvis.App.Commands;
+using Jarvis.App.Models;
 
 namespace Jarvis.App;
 
@@ -8,25 +9,28 @@ public class CommandHandler
 
     public CommandHandler(List<ICommand> commands)
     {
+        // CommandHandler получает зарегистрированные команды снаружи.
         _commands = commands;
     }
 
-    public bool Handle(string command)
+    public bool Handle(Intent intent)
     {
-        string[] parts = command.Split(' ', 2);
-
-        string commandName = parts[0].ToLower();
-        string? argument = parts.Length > 1 ? parts[1] : null;
-
+        // Ищем команду по имени, которое уже определил IntentParser.
         ICommand? foundCommand = _commands
-            .FirstOrDefault(command => command.Name == commandName);
+            .FirstOrDefault(command =>
+                command.Name.Equals(
+                    intent.CommandName,
+                    StringComparison.OrdinalIgnoreCase));
 
         if (foundCommand == null)
         {
-            Console.WriteLine($"Неизвестная команда: {commandName}");
+            Console.WriteLine(
+                $"Неизвестная команда: {intent.CommandName}");
+
             return true;
         }
 
-        return foundCommand.Execute(argument);
+        // Передаём команде только её аргумент.
+        return foundCommand.Execute(intent.Argument);
     }
 }

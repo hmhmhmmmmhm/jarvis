@@ -4,6 +4,7 @@ using Jarvis.App.Settings;
 using Jarvis.App.Services;
 using Jarvis.App.Parsing;
 using Jarvis.App.Text;
+using Jarvis.App.Models;
 Console.WriteLine("Jarvis 0.3");
 Console.WriteLine();
 
@@ -56,8 +57,10 @@ while (isRunning)
     // Убираем wake word и вежливые слова.
     command = textNormalizer.Normalize(command);
 
-    // Определяем внутреннюю команду.
-    command = intentParser.Parse(command);
+    // IntentParser превращает человеческую фразу
+    // в структурированное внутреннее намерение.
+    Intent intent = intentParser.Parse(command);
 
-    isRunning = commandHandler.Handle(command);
+    // CommandHandler получает уже готовые имя команды и аргумент.
+    isRunning = commandHandler.Handle(intent);
 }
