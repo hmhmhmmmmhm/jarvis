@@ -3,6 +3,7 @@ using Jarvis.App.Commands;
 using Jarvis.App.Settings;
 using Jarvis.App.Services;
 using Jarvis.App.Parsing;
+using Jarvis.App.Text;
 Console.WriteLine("Jarvis 0.3");
 Console.WriteLine();
 
@@ -23,7 +24,10 @@ commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 
 CommandHandler commandHandler = new CommandHandler(commands);
+
+TextNormalizer textNormalizer = new TextNormalizer();
 IntentParser intentParser = new IntentParser();
+
 
 bool isRunning = true;
 
@@ -40,18 +44,19 @@ while (isRunning)
 
     command = command.Trim();
 
-    // Запоминаем, обратился ли пользователь к Jarvis по имени,
-    // пока IntentParser ещё не удалил wake word из строки.
-    bool hasWakeWord = intentParser.HasWakeWord(command);
+    // Проверяем wake word до того, как нормализатор его удалит.
+    bool hasWakeWord = textNormalizer.HasWakeWord(command);
 
-    // Если обязательный wake word включён и имени нет,
-    // просто ждём следующую команду.
+    // Если обязательное обращение включено, без слова "Джарвис" команду игнорируем.
     if (settings.RequireWakeWord && !hasWakeWord)
     {
         continue;
     }
 
-    // После проверки убираем "Джарвис" и определяем намерение пользователя.
+    // Убираем wake word и вежливые слова.
+    command = textNormalizer.Normalize(command);
+
+    // Определяем внутреннюю команду.
     command = intentParser.Parse(command);
 
     isRunning = commandHandler.Handle(command);
