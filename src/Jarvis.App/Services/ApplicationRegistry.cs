@@ -11,21 +11,21 @@ public class ApplicationRegistry
         AppSettings settings,
         SettingsService settingsService)
     {
-        // Используем общий объект настроек приложения.
+        // Храним общий объект настроек приложения.
         _settings = settings;
+
+        // Через этот сервис сохраняем изменения в settings.json.
         _settingsService = settingsService;
     }
 
     public void EnsureDefaults()
     {
-        // Если приложения уже есть в settings.json,
-        // ничего не перезаписываем.
+        // Если реестр уже заполнен, не перезаписываем пользовательские данные.
         if (_settings.Applications.Count > 0)
         {
             return;
         }
 
-        // Добавляем базовые приложения.
         _settings.Applications["vscode"] = "code";
         _settings.Applications["vs code"] = "code";
         _settings.Applications["код"] = "code";
@@ -36,7 +36,6 @@ public class ApplicationRegistry
         _settings.Applications["chrome"] = "chrome";
         _settings.Applications["хром"] = "chrome";
 
-        // Сохраняем реестр в settings.json.
         _settingsService.Save(_settings);
     }
 
@@ -44,11 +43,57 @@ public class ApplicationRegistry
     {
         string normalizedName = appName.Trim().ToLower();
 
-        // Ищем приложение по алиасу.
+        // Возвращаем команду или путь, если алиас найден.
         return _settings.Applications.TryGetValue(
             normalizedName,
             out string? executable)
             ? executable
             : null;
+    }
+
+    public IReadOnlyDictionary<string, string> GetAll()
+    {
+        // Отдаём текущий реестр только для чтения.
+        return _settings.Applications;
+    }
+
+    public bool Add(string alias, string executable)
+    {
+        string normalizedAlias = alias.Trim().ToLower();
+
+        // Не разрешаем пустые значения.
+        if (string.IsNullOrWhiteSpace(normalizedAlias) ||
+            string.IsNullOrWhiteSpace(executable))
+        {
+            return false;
+        }
+
+        // Не перезаписываем существующий алиас молча.
+        if (_settings.Applications.ContainsKey(normalizedAlias))
+        {
+            return false;
+        }
+
+        _settings.Applications[normalizedAlias] = executable.Trim();
+
+        // Сразу сохраняем изменение на диск.
+        _settingsService.Save(_settings);
+
+        return true;
+    }
+
+    public bool Remove(string alias)
+    {
+        string normalizedAlias = alias.Trim().ToLower();
+
+        // Remove возвращает true, если запись реально существовала.
+        bool removed = _settings.Applications.Remove(normalizedAlias);
+
+        if (removed)
+        {
+            _settingsService.Save(_settings);
+        }
+
+        return removed;
     }
 }

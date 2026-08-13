@@ -20,15 +20,20 @@ ApplicationRegistry applicationRegistry =
 applicationRegistry.EnsureDefaults();
 
 List<ICommand> commands = new List<ICommand>();
-
+commands.Add(new WakeWordCommand(settings, settingsService));
 commands.Add(new TimeCommand());
 commands.Add(new DateCommand());
 commands.Add(new EchoCommand());
+
 commands.Add(new OpenCommand());
-commands.Add(new SearchCommand(settings));
 commands.Add(new SearchEngineCommand(settings, settingsService));
-commands.Add(new WakeWordCommand(settings, settingsService));
+commands.Add(new SearchCommand(settings));
 commands.Add(new LaunchCommand(applicationRegistry));
+
+commands.Add(new AppListCommand(applicationRegistry));
+commands.Add(new AppAddCommand(applicationRegistry));
+commands.Add(new AppRemoveCommand(applicationRegistry));
+
 commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 
