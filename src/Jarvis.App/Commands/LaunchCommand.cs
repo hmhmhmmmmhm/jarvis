@@ -1,33 +1,33 @@
 using System.Diagnostics;
+using Jarvis.App.Services;
 
 namespace Jarvis.App.Commands;
 
 public class LaunchCommand : ICommand
 {
+    private readonly ApplicationRegistry _applicationRegistry;
+
     public string Name => "launch";
 
     public string Description => "запустить приложение";
 
+    public LaunchCommand(ApplicationRegistry applicationRegistry)
+    {
+        // Получаем реестр приложений снаружи.
+        _applicationRegistry = applicationRegistry;
+    }
+
     public bool Execute(string? argument)
     {
-        // Без имени приложения запускать нечего.
         if (string.IsNullOrWhiteSpace(argument))
         {
             Console.WriteLine("Укажите приложение для запуска.");
             return true;
         }
 
-        string appName = argument.Trim().ToLower();
-
-        // Преобразуем человеческое имя приложения
-        // в команду или путь, который понимает Windows.
-        string? executable = appName switch
-        {
-            "vscode" or "vs code" or "код" => "code",
-            "telegram" or "телеграм" => "telegram",
-            "chrome" or "хром" => "chrome",
-            _ => null
-        };
+        // Ищем команду или путь по алиасу приложения.
+        string? executable =
+            _applicationRegistry.FindExecutable(argument);
 
         if (executable == null)
         {
@@ -37,7 +37,7 @@ public class LaunchCommand : ICommand
 
         try
         {
-            // Просим Windows запустить зарегистрированное приложение.
+            // Передаём запуск операционной системе.
             Process.Start(new ProcessStartInfo
             {
                 FileName = executable,

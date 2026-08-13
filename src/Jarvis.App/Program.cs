@@ -12,6 +12,13 @@ SettingsService settingsService = new SettingsService();
 
 AppSettings settings = settingsService.Load();
 
+// Создаём реестр приложений и заполняем его
+// стандартными значениями при первом запуске.
+ApplicationRegistry applicationRegistry =
+    new ApplicationRegistry(settings, settingsService);
+
+applicationRegistry.EnsureDefaults();
+
 List<ICommand> commands = new List<ICommand>();
 
 commands.Add(new TimeCommand());
@@ -21,7 +28,7 @@ commands.Add(new OpenCommand());
 commands.Add(new SearchCommand(settings));
 commands.Add(new SearchEngineCommand(settings, settingsService));
 commands.Add(new WakeWordCommand(settings, settingsService));
-commands.Add(new LaunchCommand());
+commands.Add(new LaunchCommand(applicationRegistry));
 commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 

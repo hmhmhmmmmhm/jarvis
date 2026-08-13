@@ -2,9 +2,13 @@ namespace Jarvis.App.Settings;
 
 public class AppSettings
 {
-    // Поисковик, который используется, если пользователь не указал другой.
+    // Поисковик по умолчанию.
     public string DefaultSearchEngine { get; set; } = "google";
 
-    // Если true, Jarvis реагирует только на команды с обращением по имени.
+    // Требовать ли обращение "Джарвис".
     public bool RequireWakeWord { get; set; } = false;
+
+    // Список приложений: алиас -> команда или путь к exe.
+    public Dictionary<string, string> Applications { get; set; } =
+        new Dictionary<string, string>();
 }
