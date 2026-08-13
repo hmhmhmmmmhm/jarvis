@@ -20,9 +20,9 @@ public class OpenCommand : ICommand
 
         url = url.ToLower() switch
         {
-            "youtube" => "https://youtube.com",
-            "github" => "https://github.com",
-            "gmail" => "https://mail.google.com",
+            "youtube" or "ютуб" => "https://youtube.com",
+            "github" or "гитхаб" => "https://github.com",
+            "gmail" or "гмейл" => "https://mail.google.com",
             _ => url
         };
 

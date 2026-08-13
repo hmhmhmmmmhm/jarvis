@@ -2,6 +2,7 @@
 using Jarvis.App.Commands;
 using Jarvis.App.Settings;
 using Jarvis.App.Services;
+using Jarvis.App.Parsing;
 Console.WriteLine("Jarvis 0.3");
 Console.WriteLine();
 
@@ -21,6 +22,7 @@ commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 
 CommandHandler commandHandler = new CommandHandler(commands);
+IntentParser intentParser = new IntentParser();
 
 bool isRunning = true;
 
@@ -36,6 +38,7 @@ while (isRunning)
     }
 
     command = command.Trim();
-
+    
+    command = intentParser.Parse(command);
     isRunning = commandHandler.Handle(command);
 }
