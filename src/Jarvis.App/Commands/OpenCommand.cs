@@ -23,6 +23,7 @@ public class OpenCommand : ICommand
             "youtube" or "ютуб" => "https://youtube.com",
             "github" or "гитхаб" => "https://github.com",
             "gmail" or "гмейл" => "https://mail.google.com",
+                "telegram" or "телеграм" => "https://web.telegram.org",
             _ => url
         };
 

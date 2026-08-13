@@ -14,7 +14,6 @@ public class IntentParserTests
     }
 
     [TestCase("открой ютуб", "open", "ютуб")]
-    [TestCase("запусти ютуб", "open", "ютуб")]
     [TestCase("открой мне гитхаб", "open", "гитхаб")]
     public void Parse_OpenPhrases_ReturnsOpenIntent(
         string input,
@@ -83,5 +82,38 @@ public class IntentParserTests
 
         Assert.That(result.CommandName, Is.EqualTo("exit"));
         Assert.That(result.Argument, Is.Null);
+    }
+
+    [TestCase("запусти vscode", "launch", "vscode")]
+    [TestCase("запусти телеграм", "launch", "телеграм")]
+    [TestCase("запусти хром", "launch", "хром")]
+    [TestCase("запусти ютуб", "launch", "ютуб")]
+    public void Parse_LaunchPhrases_ReturnsLaunchIntent(
+        string input,
+        string expectedCommand,
+        string expectedArgument)
+    {
+        Intent result = _parser.Parse(input);
+
+        Assert.That(result.CommandName, Is.EqualTo(expectedCommand));
+        Assert.That(result.Argument, Is.EqualTo(expectedArgument));
+    }
+
+    [Test]
+    public void Parse_OpenTelegram_ReturnsOpenIntent()
+    {
+        Intent result = _parser.Parse("открой телеграм");
+
+        Assert.That(result.CommandName, Is.EqualTo("open"));
+        Assert.That(result.Argument, Is.EqualTo("телеграм"));
+    }
+
+    [Test]
+    public void Parse_LaunchTelegram_ReturnsLaunchIntent()
+    {
+        Intent result = _parser.Parse("запусти телеграм");
+
+        Assert.That(result.CommandName, Is.EqualTo("launch"));
+        Assert.That(result.Argument, Is.EqualTo("телеграм"));
     }
 }

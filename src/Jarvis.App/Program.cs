@@ -21,6 +21,7 @@ commands.Add(new OpenCommand());
 commands.Add(new SearchCommand(settings));
 commands.Add(new SearchEngineCommand(settings, settingsService));
 commands.Add(new WakeWordCommand(settings, settingsService));
+commands.Add(new LaunchCommand());
 commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 

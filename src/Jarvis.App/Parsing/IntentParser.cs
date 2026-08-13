@@ -20,18 +20,28 @@ public class IntentParser
             return new Intent("date");
         }
 
+        // Фраза "запусти ..." относится к запуску локального приложения.
+        if (normalizedInput.StartsWith(
+                "запусти ",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            string appName = RemovePrefix(
+                normalizedInput,
+                "запусти ");
+
+            return new Intent("launch", appName);
+        }
+
+        // Фразы "открой ..." пока оставляем для сайтов и веб-ресурсов.
         if (StartsWithAny(
                 normalizedInput,
                 "открой мне ",
-                "открой ",
-                "запусти "))
+                "открой "))
         {
-            // Получаем только объект, который пользователь хочет открыть.
             string target = RemovePrefix(
                 normalizedInput,
                 "открой мне ",
-                "открой ",
-                "запусти ");
+                "открой ");
 
             return new Intent("open", target);
         }
