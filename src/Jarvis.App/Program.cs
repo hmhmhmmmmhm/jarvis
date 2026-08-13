@@ -18,6 +18,7 @@ commands.Add(new EchoCommand());
 commands.Add(new OpenCommand());
 commands.Add(new SearchCommand(settings));
 commands.Add(new SearchEngineCommand(settings, settingsService));
+commands.Add(new WakeWordCommand(settings, settingsService));
 commands.Add(new ExitCommand());
 commands.Add(new HelpCommand(commands));
 
@@ -38,7 +39,20 @@ while (isRunning)
     }
 
     command = command.Trim();
-    
+
+    // Запоминаем, обратился ли пользователь к Jarvis по имени,
+    // пока IntentParser ещё не удалил wake word из строки.
+    bool hasWakeWord = intentParser.HasWakeWord(command);
+
+    // Если обязательный wake word включён и имени нет,
+    // просто ждём следующую команду.
+    if (settings.RequireWakeWord && !hasWakeWord)
+    {
+        continue;
+    }
+
+    // После проверки убираем "Джарвис" и определяем намерение пользователя.
     command = intentParser.Parse(command);
+
     isRunning = commandHandler.Handle(command);
 }

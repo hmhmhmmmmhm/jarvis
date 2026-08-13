@@ -4,7 +4,9 @@ public class IntentParser
 {
     public string Parse(string input)
     {
+
         string normalizedInput = input.Trim();
+        normalizedInput = RemoveWakeWord(normalizedInput);
 
         if (IsTimeQuestion(normalizedInput))
         {
@@ -129,5 +131,51 @@ public class IntentParser
         }
 
         return result;
+    }
+
+        private string RemoveWakeWord(string input)
+    {
+        string[] wakeWords =
+        {
+            "джарвис, ",
+            "джарвис ",
+            "jarvis, ",
+            "jarvis "
+        };
+
+        foreach (string wakeWord in wakeWords)
+        {
+            if (input.StartsWith(
+                    wakeWord,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return input[wakeWord.Length..].Trim();
+            }
+        }
+
+        return input;
+    }
+
+
+        public bool HasWakeWord(string input)
+    {
+        string normalizedInput = input.Trim();
+
+        // Проверяем русское и английское написание имени.
+        return normalizedInput.StartsWith(
+                "джарвис,",
+                StringComparison.OrdinalIgnoreCase)
+            ||
+            normalizedInput.StartsWith(
+                "джарвис ",
+                StringComparison.OrdinalIgnoreCase)
+            ||
+            normalizedInput.StartsWith(
+                "jarvis,",
+                StringComparison.OrdinalIgnoreCase)
+            ||
+            normalizedInput.StartsWith(
+                "jarvis ",
+                StringComparison.OrdinalIgnoreCase);
     }
 }

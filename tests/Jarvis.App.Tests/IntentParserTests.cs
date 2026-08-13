@@ -96,4 +96,28 @@ public class IntentParserTests
 
         Assert.That(result, Is.EqualTo(expected));
     }
+
+    [TestCase("Джарвис, открой ютуб", "open ютуб")]
+    [TestCase("Джарвис открой ютуб", "open ютуб")]
+    [TestCase("jarvis, открой гитхаб", "open гитхаб")]
+    public void Parse_WakeWordOpenPhrase_RemovesWakeWord(
+        string input,
+        string expected)
+    {
+        string result = _parser.Parse(input);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [TestCase("Джарвис, который час", "time")]
+    [TestCase("Джарвис сколько времени", "time")]
+    [TestCase("Джарвис, какая сегодня дата", "date")]
+    public void Parse_WakeWordQuestions_ReturnsCommand(
+        string input,
+        string expected)
+    {
+        string result = _parser.Parse(input);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
 }
